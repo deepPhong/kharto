@@ -1,0 +1,37 @@
+---
+title: "Recrutement geographique IDF"
+output: 
+  html_document:
+    theme: flatly
+params:
+  name: NA
+  map: NA
+  table: NA
+---
+
+<style type="text/css">
+
+h1.title {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 40px;
+  font-weight: bold;
+}
+
+h3 {
+  font-weight: bold;
+}
+
+</style>
+
+  - Etablissement : ``r params$name``
+  - Annee : `2017`
+
+```{r echo=F, message=F, warning=F, out.width = '100%'}
+params$map
+```
+
+
+
+```{r echo=F, message=F, warning=F, comment=F}
+params$table
+```
