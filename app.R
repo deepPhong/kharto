@@ -8,6 +8,7 @@ library(leaflet)
 library(tidyverse)
 library(readxl)
 library(knitr)
+library(stringi)
 
 ui <- dashboardPage(
   skin="green",
@@ -55,6 +56,7 @@ server <- function(input, output, session) {
   })
   
   observeEvent(ordered_table(), {
+    req(ordered_table())
     output$help <- renderUI({hide("help")})
   })
   
@@ -92,6 +94,7 @@ server <- function(input, output, session) {
       )
       colnames(etabs[[etab_name]]) <- c("postal_code", "nom_comm", "nb_patients")
       etabs[[etab_name]] <- etabs[[etab_name]][!is.na(etabs[[etab_name]]$nb_patients),]
+      etabs[[etab_name]]$postal_code <- as.character(etabs[[etab_name]]$postal_code)
     }
     return(etabs)
   })
@@ -100,21 +103,19 @@ server <- function(input, output, session) {
     req(input$etablissement)
     names_list <- sapply(
       input$etablissement$datapath, 
-      function(x) iconv(
-        read_excel(
+      function(x) read_excel(
           x, 
           skip = 12, 
           n_max = 1, 
           col_names = FALSE
-        )[[1]], 
-        to="ASCII//TRANSLIT"
-      )
+        )[[1]]
     )
     Encoding(names_list) <- "latin1"
     return(names_list)
   })
   
   info_on_map <- reactive({
+    req(load_etablissement(), etablissement_name(), load_map())
     map <- st_as_sf(load_map()) %>%
       select(c(
         "postal_code",  
@@ -147,6 +148,7 @@ server <- function(input, output, session) {
   })
   
   ordered_table <- reactive({
+    req(info_on_map(), etablissement_name())
     infos <- info_on_map()
     ordered_table <- list()
     etab_names <- etablissement_name()
@@ -175,6 +177,7 @@ server <- function(input, output, session) {
   
   observeEvent(load_map(), {
     output$dynamic_etablissement <- renderUI({
+      req(load_map())
       fileInput(
         inputId = "etablissement", 
         label = h4("Donnees etablissements"),
@@ -187,6 +190,7 @@ server <- function(input, output, session) {
   
   observeEvent(ordered_table(), {
     output$dynamic_map <- renderUI({
+      req(ordered_table())
       fluidRow(
         box(leafletOutput("mymap"), width=12)
       )
@@ -195,6 +199,7 @@ server <- function(input, output, session) {
   
   observeEvent(ordered_table(), {
     output$dynamic_table <- renderUI({
+      req(ordered_table())
       fluidRow(
         box(dataTableOutput("etablissement_table"), width=12)
       )
@@ -202,6 +207,7 @@ server <- function(input, output, session) {
   })
   
   rendered_maps <- reactive({
+    req(info_on_map(), etablissement_name())
     rendered_maps <- list()
     infos <- info_on_map()
     etab_names <- etablissement_name()
@@ -254,6 +260,7 @@ server <- function(input, output, session) {
   
   observeEvent(rendered_maps(), {
     output$dynamic_choice <- renderUI({
+      req(rendered_maps())
       selectizeInput(
         inputId="etab_choice",
         label=h4("Etablissement"),
@@ -266,6 +273,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$etab_choice, {
     output$mymap <- renderLeaflet({
+      req(rendered_maps(), input$etab_choice)
       withProgress(message="Production des cartes", {
         rendered_maps()[[input$etab_choice]]
       })
@@ -275,6 +283,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$etab_choice, {
     output$etablissement_table <- renderDataTable({
+      req(ordered_table(), input$etab_choice)
       datatable(
         data=ordered_table()[[input$etab_choice]],
         style="bootstrap",
@@ -298,13 +307,17 @@ server <- function(input, output, session) {
   
   output$report <- downloadHandler(
     filename = function() {
-      paste("rapport_", input$etab_choice, "_", Sys.Date(), ".html", sep="")
+      paste(
+        "rapport_", 
+        iconv(input$etab_choice, to="ASCII//TRANSLIT"), 
+        "_", Sys.Date(), ".html", sep=""
+      )
     },
     content = function(file) {
       tempReport <- file.path(tempdir(), "report.Rmd")
       file.copy("report.Rmd", tempReport, overwrite = TRUE)
       params <- list(
-        name=input$etab_choice,
+        name=iconv(input$etab_choice, to="ASCII//TRANSLIT"),
         table=datatable(
           data=ordered_table()[[input$etab_choice]],
           style="bootstrap",
