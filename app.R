@@ -1,5 +1,6 @@
 library(shinydashboard)
 library(shiny)
+library(shinyjs)
 library(DT)
 library(rgdal)
 library(sf)
@@ -22,7 +23,8 @@ ui <- dashboardPage(
   
   dashboardBody(
     uiOutput(outputId="dynamic_map"),
-    uiOutput(outputId="dynamic_table")
+    uiOutput(outputId="dynamic_table"),
+    uiOutput(outputId="help")
   )
 )
 
@@ -32,10 +34,29 @@ server <- function(input, output, session) {
     shiny.maxRequestSize=30*1024^2
   )
   
-  setwd("./")
-  
-  
   pal <- colorNumeric("viridis", NULL, reverse=TRUE)
+  
+  
+  url <- a("ce lien", href="https://cartographie.atih.sante.fr/#pg=3;l=fr;i=sejoursmco.eft;f=TT;s=2017;v=map1")
+  output$help <- renderUI({
+    box(
+      width=6,
+      title = "Instructions",
+      solidHeader = TRUE,
+      collapsible = TRUE,
+      status = "success",
+      "Les fichiers à charger sont à récupérer sur l'application de cartographie de l'ATIH en cliquant sur",
+      tagList(url), HTML("puis :"),
+      HTML("<br> 1) Choisir l'établissement"),
+      HTML("<br> 2) Cliquer sur <b>Mettre à jour la carte</b>"),
+      HTML("<br> 3) Cliquer sur <b>Imprimer/Exporter</b> en haut à droite de la carte"),
+      HTML("<br> 4) Cliquer sur <b>Exporter les données</b>")
+    )
+  })
+  
+  observeEvent(ordered_table(), {
+    output$help <- renderUI({hide("help")})
+  })
   
   load_map <- reactive({
     withProgress(message="Chargement du fond de carte", {
@@ -60,7 +81,6 @@ server <- function(input, output, session) {
   
   load_etablissement <- reactive({
     req(input$etablissement)
-    
     etabs = list()
     for (etab in input$etablissement$datapath) {
       etab_name <- substr(etab, (nchar(etab)+1)-10, nchar(etab))
@@ -78,12 +98,17 @@ server <- function(input, output, session) {
   
   etablissement_name <- reactive({
     req(input$etablissement)
-    names_list <- sapply(input$etablissement$datapath, function(x) read_excel(
-      x, 
-      skip = 12, 
-      n_max = 1, 
-      col_names = FALSE
-      )[[1]]
+    names_list <- sapply(
+      input$etablissement$datapath, 
+      function(x) iconv(
+        read_excel(
+          x, 
+          skip = 12, 
+          n_max = 1, 
+          col_names = FALSE
+        )[[1]], 
+        to="ASCII//TRANSLIT"
+      )
     )
     Encoding(names_list) <- "latin1"
     return(names_list)

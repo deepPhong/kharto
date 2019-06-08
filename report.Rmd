@@ -24,7 +24,6 @@ h3 {
 </style>
 
   - Etablissement : ``r params$name``
-  - Annee : `2017`
 
 ```{r echo=F, message=F, warning=F, out.width = '100%'}
 params$map
