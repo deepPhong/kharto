@@ -2,6 +2,7 @@ library(shinydashboard)
 library(shiny)
 library(DT)
 library(rgdal)
+library(sf)
 library(leaflet)
 library(tidyverse)
 library(readxl)
@@ -39,7 +40,7 @@ server <- function(input, output, session) {
   load_map <- reactive({
     withProgress(message="Chargement du fond de carte", {
       map_url <- "https://www.data.gouv.fr/fr/datasets/r/1858be46-37ab-49b5-ac62-806b8cc85378"
-      map_temp = paste(tempdir(), "map.geojson", sep="\\")
+      map_temp <- paste(tempdir(), "map.geojson", sep="\\")
       incProgress(1/3)
       download.file(map_url, map_temp)
       incProgress(1/3)
@@ -77,7 +78,6 @@ server <- function(input, output, session) {
   
   etablissement_name <- reactive({
     req(input$etablissement)
-    
     names_list <- sapply(input$etablissement$datapath, function(x) read_excel(
       x, 
       skip = 12, 
@@ -90,18 +90,32 @@ server <- function(input, output, session) {
   })
   
   info_on_map <- reactive({
-    map <- load_map()
+    map <- st_as_sf(load_map()) %>%
+      select(c(
+        "postal_code",  
+        "nom_dept1", 
+        "nom_comm", 
+        "population"
+      )
+    )
     etabs <- load_etablissement()
     etab_names <- etablissement_name()
     info_on_map <- list()
     
     for (i in seq_along(etabs)) {
-      data <- etabs[[i]][, c("postal_code", "nb_patients")]
+      data <- etabs[[i]] %>% 
+        filter(nb_patients >= 20) %>% 
+        select(c(postal_code, nb_patients))
       info_on_map[[etab_names[i]]] <- sp::merge(
         map, 
         data, 
         by="postal_code",
         all.x=FALSE
+      ) 
+      info_on_map[[etab_names[i]]] <- (
+       info_on_map[[etab_names[i]]] %>% 
+         group_by(postal_code) %>% 
+         top_n(1, population)
       )
     }
     return(info_on_map)
@@ -114,18 +128,12 @@ server <- function(input, output, session) {
     
     for (i in seq_along(infos)) {
       ordered_table[[etab_names[i]]] <- (
-        infos[[i]]@data[order(-infos[[i]]$nb_patients),]
-      )
+        infos[[i]][order(-infos[[i]]$nb_patients), ] 
+      ) %>% st_drop_geometry()
       
-      ordered_table[[etab_names[i]]] = ordered_table[[etab_names[i]]][
-        !is.na(ordered_table[[etab_names[i]]]$nb_patients), 
-        c(
-        "postal_code",  
-        "nom_dept1", 
-        "nom_comm", 
-        "population", 
-        "nb_patients"
-      )]
+      ordered_table[[etab_names[i]]] <- ordered_table[[etab_names[i]]][
+        !is.na(ordered_table[[etab_names[i]]]$nb_patients), ]
+      
       colnames(ordered_table[[etab_names[i]]]) <- c(
         "Code Postal",  
         "Departement", 
