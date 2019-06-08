@@ -12,7 +12,7 @@ library(knitr)
 ui <- dashboardPage(
   skin="green",
   
-  dashboardHeader(title = "map-sante"),
+  dashboardHeader(title = "kharto"),
   
   dashboardSidebar(
     tags$style(".skin-green .sidebar a { color: #444}"),
