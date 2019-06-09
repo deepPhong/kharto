@@ -45,5 +45,3 @@ Pour l'instant, seule l'île-de-France est disponible.
   </p>
   
   * Enfin, importer le fichier obtenu dans `kharto`. La suite est plus intuitive :)
-  
-  ##
