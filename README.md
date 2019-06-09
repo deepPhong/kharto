@@ -45,3 +45,8 @@ Pour l'instant, seule l'île-de-France est disponible.
   </p>
   
   * Enfin, importer le fichier obtenu dans `kharto`. La suite est plus intuitive :)
+
+## To-do
+
+- [ ] Extension à la France entière
+- [ ] Branchement direct sur les données de l'ATIH ?
