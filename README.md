@@ -46,6 +46,10 @@ Pour l'instant, seule l'île-de-France est disponible.
   
   * Enfin, importer le fichier obtenu dans `kharto`. La suite est plus intuitive :)
 
+## Lancer l'application
+
+Vous pouvez [cliquer sur ce lien](https://dpnguyen.shinyapps.io/kharto/) pour y accéder, ou télécharger le contenu du dossier `shinyapps` et lancer la commande `shiny::runApp('app.R')` dans R/Rstudio. Un Dockerfile est également mis à disposition pour créer un container adéquat.
+
 ## To-do
 
 - [ ] Ajout d'autres cartographies
