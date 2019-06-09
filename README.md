@@ -8,9 +8,9 @@ Lien vers l'application : https://dpnguyen.shinyapps.io/kharto/
 `kharto` est une application qui permet de représenter visuellement le recrutement d'un établissement hospitalier par commune. Les données à charger sont mises à disposition sur l'application de cartographie de l'ATIH (suivre les instructions pour les récupérer). 
 Pour l'instant, seule l'île-de-France est disponible.
 
-    * Cartes interactives
-    * Tableaux de données avec recherche textuelle
-    * Génération automatique de rapports html interactifs
+ * Cartes interactives
+ * Tableaux de données avec recherche textuelle
+ * Génération automatique de rapports html interactifs
 
 <p align="center">
     <img src="https://user-images.githubusercontent.com/20992061/59157430-8d3a6a80-8aaa-11e9-96b8-a091a5fd2e09.gif" width="800">
