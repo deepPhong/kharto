@@ -34,24 +34,47 @@ server <- function(input, output, session) {
   options(
     shiny.maxRequestSize=30*1024^2
   )
-  
   pal <- colorNumeric("viridis", NULL, reverse=TRUE)
+  url <- a(
+    "l'onglet FOCUS de Cartographie ATIH", 
+    href="https://cartographie.atih.sante.fr/#pg=3;l=fr;v=map1"
+  )
+  github <- a(
+    "ce lien.", 
+    href="https://github.com/deepPhong/kharto"
+  )
   
-  
-  url <- a("ce lien", href="https://cartographie.atih.sante.fr/#pg=3;l=fr;i=sejoursmco.eft;f=TT;s=2017;v=map1")
   output$help <- renderUI({
-    box(
-      width=6,
-      title = "Instructions",
-      solidHeader = TRUE,
-      collapsible = TRUE,
-      status = "success",
-      "Les fichiers à charger sont à récupérer sur l'application de cartographie de l'ATIH en cliquant sur",
-      tagList(url), HTML("puis :"),
-      HTML("<br> 1) Choisir l'établissement"),
-      HTML("<br> 2) Cliquer sur <b>Mettre à jour la carte</b>"),
-      HTML("<br> 3) Cliquer sur <b>Imprimer/Exporter</b> en haut à droite de la carte"),
-      HTML("<br> 4) Cliquer sur <b>Exporter les données</b>")
+    fluidRow(
+      box(
+        width=6,
+        title = "Instructions",
+        solidHeader = TRUE,
+        collapsible = TRUE,
+        status = "success",
+        "Instructions détaillées sur", tagList(github), br(),
+        HTML("<i> Résumé</i> :"), br(),
+        HTML("1) Se rendre sur"), tagList(url), br(),
+        HTML("2) Choisir le type de séjour"), br(),
+        HTML("3) Cliquer sur <b>Voir la carte</b>"), br(),
+        HTML("4) Sélectionner l'établissement"), br(),
+        HTML("5) Cliquer sur <b>Mettre à jour la carte</b>"), br(),
+        HTML("6) Cliquer sur <b>Imprimer/Exporter</b> en haut à droite de la carte"), br(),
+        HTML("7) Cliquer sur <b>Exporter les données</b>"), br(),
+        HTML("8) Importer les données dans <code>kharto</code>")
+      ),
+      box(
+        width=6,
+        title = "Qu'est-ce que c'est ?",
+        solidHeader = TRUE,
+        collapsible = TRUE,
+        status = "success",
+        HTML("<code>kharto</code>"), "est une application qui permet de représenter",
+        "visuellement le recrutement d'un établissement hospitalier par commune.",
+        "Les données à charger sont mises à disposition sur l'application de",
+        "cartographie de l'ATIH (suivre les instructions pour les récupérer).",
+        br(), "Pour l'instant, seule l'île-de-France est disponible."
+      )
     )
   })
   
@@ -335,7 +358,6 @@ server <- function(input, output, session) {
       )
     }
   )
-  
 }
 
 shinyApp(ui, server)
