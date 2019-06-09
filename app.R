@@ -37,6 +37,9 @@ server <- function(input, output, session) {
     shiny.maxRequestSize=30*1024^2
   )
   pal <- colorNumeric("viridis", NULL, reverse=TRUE)
+  
+  #### INTRO ####
+  
   url <- a(
     "l'onglet FOCUS de Cartographie ATIH", 
     href="https://cartographie.atih.sante.fr/#pg=3;l=fr;v=map1"
@@ -84,6 +87,8 @@ server <- function(input, output, session) {
     req(ordered_table())
     output$help <- renderUI({hide("help")})
   })
+  
+  #### LOADING DATA ####
   
   load_map <- reactive({
     withProgress(message="Chargement du fond de carte", {
@@ -138,6 +143,8 @@ server <- function(input, output, session) {
     Encoding(names_list) <- "latin1"
     return(names_list)
   })
+  
+  #### GENERATING TABLES ####
   
   info_on_map <- reactive({
     req(load_etablissement(), etablissement_name(), load_map())
@@ -200,36 +207,7 @@ server <- function(input, output, session) {
     return(ordered_table)
   })
   
-  observeEvent(load_map(), {
-    output$dynamic_etablissement <- renderUI({
-      req(load_map())
-      fileInput(
-        inputId = "etablissement", 
-        label = h4("Donnees etablissements"),
-        multiple = TRUE,
-        buttonLabel = "Parcourir",
-        placeholder = "1 ou + fichiers"
-      )
-    })
-  })
-  
-  observeEvent(ordered_table(), {
-    output$dynamic_map <- renderUI({
-      req(ordered_table())
-      fluidRow(
-        box(leafletOutput("mymap"), width=12)
-      )
-    })
-  })
-  
-  observeEvent(ordered_table(), {
-    output$dynamic_table <- renderUI({
-      req(ordered_table())
-      fluidRow(
-        box(dataTableOutput("etablissement_table"), width=12)
-      )
-    })
-  })
+  #### GENERATING MAPS ####
   
   rendered_maps <- reactive({
     req(info_on_map(), etablissement_name())
@@ -244,7 +222,7 @@ server <- function(input, output, session) {
           lat=48.86263, 
           lng=2.336293, 
           zoom=10
-          ) %>%
+        ) %>%
         addProviderTiles(
           provider="Esri.WorldGrayCanvas",
           options = providerTileOptions(
@@ -283,6 +261,39 @@ server <- function(input, output, session) {
     return(rendered_maps)
   })
   
+  #### DYNAMIC UI RENDERING ####
+  
+  observeEvent(load_map(), {
+    output$dynamic_etablissement <- renderUI({
+      req(load_map())
+      fileInput(
+        inputId = "etablissement", 
+        label = h4("Donnees etablissements"),
+        multiple = TRUE,
+        buttonLabel = "Parcourir",
+        placeholder = "1 ou + fichiers"
+      )
+    })
+  })
+  
+  observeEvent(ordered_table(), {
+    output$dynamic_map <- renderUI({
+      req(ordered_table())
+      fluidRow(
+        box(leafletOutput("mymap"), width=12)
+      )
+    })
+  })
+  
+  observeEvent(ordered_table(), {
+    output$dynamic_table <- renderUI({
+      req(ordered_table())
+      fluidRow(
+        box(dataTableOutput("etablissement_table"), width=12)
+      )
+    })
+  })
+  
   observeEvent(rendered_maps(), {
     output$dynamic_choice <- renderUI({
       req(rendered_maps())
@@ -295,7 +306,6 @@ server <- function(input, output, session) {
     })
   })
   
-  
   observeEvent(input$etab_choice, {
     output$mymap <- renderLeaflet({
       req(rendered_maps(), input$etab_choice)
@@ -304,7 +314,6 @@ server <- function(input, output, session) {
       })
     })
   })
-  
   
   observeEvent(input$etab_choice, {
     output$etablissement_table <- renderDataTable({
@@ -329,6 +338,8 @@ server <- function(input, output, session) {
         )
     })
   })
+  
+  #### GENERATING REPORTS ####
   
   output$report <- downloadHandler(
     filename = function() {
