@@ -48,7 +48,7 @@ Pour l'instant, seule l'île-de-France est disponible.
 
 ## Lancer l'application
 
-Vous pouvez [cliquer sur ce lien](https://dpnguyen.shinyapps.io/kharto/) pour y accéder, ou télécharger le contenu du dossier `shinyapps` et lancer la commande `shiny::runApp('app.R')` dans R/Rstudio. Un Dockerfile est également mis à disposition pour créer un container adéquat.
+Vous pouvez [cliquer sur ce lien](https://dpnguyen.shinyapps.io/kharto/) pour y accéder, ou télécharger le contenu du dossier `shinyapps` et lancer la commande `shiny::runApp('app.R')` dans R/Rstudio (ou cliquer sur le bouton `Run App` dans Rstudio) après avoir installé les librairies requises. Un Dockerfile est également mis à disposition pour créer un container adéquat.
 
 ## To-do
 
