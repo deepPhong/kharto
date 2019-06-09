@@ -48,5 +48,6 @@ Pour l'instant, seule l'île-de-France est disponible.
 
 ## To-do
 
+- [ ] Ajout d'autres cartographies
 - [ ] Extension à la France entière
 - [ ] Branchement direct sur les données de l'ATIH ?
