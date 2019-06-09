@@ -8,7 +8,6 @@ library(leaflet)
 library(tidyverse)
 library(readxl)
 library(knitr)
-library(stringi)
 
 ui <- dashboardPage(
   skin="green",
