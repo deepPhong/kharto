@@ -31,6 +31,8 @@ ui <- dashboardPage(
 
 server <- function(input, output, session) {
   
+  session$onSessionEnded(stopApp) #stops app when closing browser tab
+  
   options(
     shiny.maxRequestSize=30*1024^2
   )
