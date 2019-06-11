@@ -48,6 +48,11 @@ server <- function(input, output, session) {
     href="https://github.com/deepPhong/kharto"
   )
   
+  mail <- a(
+    "dinh-phong.nguyen@aphp.fr",
+    href="mailto:dinh-phong.nguyen@aphp.fr?subject=Question/bug kharto"
+  )
+  
   output$help <- renderUI({
     fluidRow(
       box(
@@ -57,7 +62,7 @@ server <- function(input, output, session) {
         collapsible = TRUE,
         status = "success",
         "Instructions détaillées sur", tagList(github), br(),
-        HTML("<i> Résumé</i> :"), br(),
+        HTML("<u> Résumé</u> :"), br(),
         HTML("1) Se rendre sur"), tagList(url), br(),
         HTML("2) Choisir le type de séjour"), br(),
         HTML("3) Cliquer sur <b>Voir la carte</b>"), br(),
@@ -65,7 +70,8 @@ server <- function(input, output, session) {
         HTML("5) Cliquer sur <b>Mettre à jour la carte</b>"), br(),
         HTML("6) Cliquer sur <b>Imprimer/Exporter</b> en haut à droite de la carte"), br(),
         HTML("7) Cliquer sur <b>Exporter les données</b>"), br(),
-        HTML("8) Importer les données dans <code>kharto</code>")
+        HTML("8) Importer les données dans <code>kharto</code>"),
+        br(), HTML("<i>PS: Pour l'instant, seule l'île-de-France est disponible.</i>")
       ),
       box(
         width=6,
@@ -77,7 +83,7 @@ server <- function(input, output, session) {
         "visuellement le recrutement d'un établissement hospitalier par commune.",
         "Les données à charger sont mises à disposition sur l'application de",
         "cartographie de l'ATIH (suivre les instructions pour les récupérer).",
-        br(), "Pour l'instant, seule l'île-de-France est disponible."
+        br(), br(), "Pour toute question ou bug :", tagList(mail)
       )
     )
   })
@@ -91,22 +97,17 @@ server <- function(input, output, session) {
   
   load_map <- reactive({
     withProgress(message="Chargement du fond de carte", {
-      map_url <- "https://www.data.gouv.fr/fr/datasets/r/1858be46-37ab-49b5-ac62-806b8cc85378"
-      map_temp <- paste(tempdir(), "map.geojson", sep="\\")
+      map_path <- "correspondances-code-insee-code-postal.geojson"
       incProgress(1/3)
-      download.file(map_url, map_temp)
-      incProgress(1/3)
-      map <- readOGR(map_temp)
+      map <- readOGR(map_path)
       incProgress(1/3)
     })
     return(map)
   })
   
   load_dept <- reactive({
-    map_url <- "https://www.data.gouv.fr/fr/datasets/r/b3549876-9b1a-49af-836b-90d549590817"
-    map_temp = paste(tempdir(), "map.geojson", sep="\\")
-    download.file(map_url, map_temp)
-    map <- readOGR(map_temp)
+    map_path <- "geoflar-departements.geojson"
+    map <- readOGR(map_path)
     return(map)
   })
   
